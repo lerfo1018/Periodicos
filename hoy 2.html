@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestor de Síntesis Informativa ASEH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Estilos Generales */
+    body {
+      font-family: 'Open Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    /* Encabezado */
+    header {
+      background-color: #8A1538;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 5px solid #6d112c;
+    }
+    header h1 {
+        margin: 0;
+        font-size: 1.8rem;
+    }
+    /* Navegación y Controles */
+    .controls-nav-container {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    nav ul {
+      list-style: none;
+      background: #333;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    nav ul li a {
+      display: block;
+      padding: 0.75rem 1.5rem;
+      color: white;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+    nav ul li a:hover {
+      background: #8A1538;
+    }
+    /* Contenido Principal */
+    main {
+      padding: 1rem;
+      max-width: 960px;
+      margin: auto;
+    }
+
+    /* --- NUEVO: Panel de Administración --- */
+    #admin-controls {
+        background-color: #fff;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    #toggle-form-btn {
+        background-color: #0056b3;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    #toggle-form-btn:hover {
+        background-color: #004494;
+    }
+    #add-note-form {
+        display: none; /* Oculto por defecto */
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        text-align: left;
+    }
+    #add-note-form h3 {
+        text-align: center;
+        margin-top: 0;
+        color: #8A1538;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box; /* Importante para el padding */
+    }
+    .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+    .form-group button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .form-group button:hover {
+        background-color: #218838;
+    }
+    /* ------------------------------------ */
+
+    #calendario {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    /* Secciones de Noticias */
+    section h2 {
+      color: #8A1538;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 0.5rem;
+    }
+    .seccion-noticia {
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      box-shadow: 0 0 15px rgba(0,0,0,0.07);
+    }
+    .seccion-noticia h3 {
+        margin-top: 0;
+        color: #8A1538;
+    }
+    .noticia-item {
+        border-top: 1px solid #eee;
+        padding: 1rem 0;
+    }
+    .noticia-item:first-child {
+        border-top: none;
+        padding-top: 0;
+    }
+    .noticia-item h4 {
+        margin: 0 0 0.25rem 0;
+        color: #333;
+    }
+    .noticia-item p {
+        margin: 0.25rem 0;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    .fuente {
+        font-size: 0.8rem;
+        color: #666;
+        font-style: italic;
+    }
+    /* Pie de Página */
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 600px) {
+      nav ul {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Gestor de Síntesis Informativa ASEH</h1>
+    <p id="fecha-actual"></p>
+  </header>
+
+<div class="controls-nav-container">
+  <nav>
+    <ul>
+      <li><a href="#primeras-planas-nacionales">Nacionales</a></li>
+      <li><a href="#primeras-planas-hidalgo">Hidalgo</a></li>
+      <li><a href="#informacion-local">Local</a></li>
+      <li><a href="#informacion-aseh">ASEH</a></li>
+      <li><a href="#legislativo">Legislativo</a></li>
+      <li><a href="#opinion">Opinión</a></li>
+      <li><a href="#cartones">Cartones</a></li>
+    </ul>
+  </nav>
+</div>
+
+
+  <main>
+    <section id="admin-controls">
+        <button id="toggle-form-btn">➕ Agregar Nueva Nota</button>
+        <form id="add-note-form">
+            <h3>Registrar Nueva Nota Informativa</h3>
+            <div class="form-group">
+                <label for="note-title">Título de la Nota</label>
+                <input type="text" id="note-title" required>
+            </div>
+            <div class="form-group">
+                <label for="note-source">Fuente (Ej: El Universal, Criterio Hidalgo)</label>
+                <input type="text" id="note-source" required>
+            </div>
+            <div class="form-group">
+                <label for="note-summary">Resumen o Cuerpo de la Nota</label>
+                <textarea id="note-summary" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="note-category">Categoría</label>
+                <select id="note-category" required>
+                    </select>
+            </div>
+             <div class="form-group">
+                <label for="note-date">Fecha de la Nota</label>
+                <input type="date" id="note-date" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Guardar Nota</button>
+            </div>
+        </form>
+    </section>
+
+    <section id="calendario">
+      <h2>Selecciona una fecha para ver la síntesis</h2>
+      <input type="date" id="selector-fecha" />
+    </section>
+
+    <div id="secciones-container">
+      </div>
+  </main>
+
+  <footer>
+    <p>© Auditoría Superior del Estado de Hidalgo | Última actualización: <span id="ultima-actualizacion"></span></p>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const fechaActual = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        
+        document.getElementById("fecha-actual").textContent = fechaActual.toLocaleDateString('es-ES', options);
+        document.getElementById("ultima-actualizacion").textContent = fechaActual.toLocaleDateString('es-ES');
+
+        const categorias = [
+            "Primeras Planas Nacionales", "Primeras Planas Hidalgo", "Información Local",
+            "Información ASEH", "Legislativo", "Información Nacional", "Opinión", "Cartones"
+        ];
+        
+        const form = document.getElementById('add-note-form');
+        const toggleBtn = document.getElementById('toggle-form-btn');
+        const selectorFecha = document.getElementById('selector-fecha');
+        const contenedor = document.getElementById('secciones-container');
+        const selectorCategoria = document.getElementById('note-category');
+        const inputFechaNota = document.getElementById('note-date');
+        
+        // --- Lógica de Datos con localStorage ---
+
+        // Carga los datos desde localStorage o inicializa un objeto vacío si no hay nada.
+        let newsData = JSON.parse(localStorage.getItem('newsDataASEH')) || {};
+
+        function saveData() {
+            localStorage.setItem('newsDataASEH', JSON.stringify(newsData));
+        }
+
+        // --- Lógica del Formulario ---
+
+        toggleBtn.addEventListener('click', () => {
+            const isHidden = form.style.display === 'none';
+            form.style.display = isHidden ? 'block' : 'none';
+            toggleBtn.textContent = isHidden ? '➖ Ocultar Formulario' : '➕ Agregar Nueva Nota';
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Evita que la página se recargue
+
+            const nuevaNota = {
+                title: document.getElementById('note-title').value,
+                source: document.getElementById('note-source').value,
+                summary: document.getElementById('note-summary').value,
+            };
+            const categoria = selectorCategoria.value;
+            const fecha = inputFechaNota.value;
+
+            // Si no existe una entrada para esa fecha, se crea
+            if (!newsData[fecha]) {
+                newsData[fecha] = {};
+            }
+            // Si no existe la categoría para esa fecha, se inicializa como un array
+            if (!newsData[fecha][categoria]) {
+                newsData[fecha][categoria] = [];
+            }
+
+            // Añade la nueva nota al principio del array (para que aparezca primero)
+            newsData[fecha][categoria].unshift(nuevaNota);
+            
+            saveData(); // Guarda el objeto completo en localStorage
+
+            alert('¡Nota guardada con éxito!');
+            form.reset(); // Limpia el formulario
+            inputFechaNota.value = fecha; // Mantiene la fecha seleccionada
+            
+            // Refresca la vista para mostrar la nota recién añadida
+            cargarContenido(selectorFecha.value);
+        });
+        
+        // --- Lógica de Visualización ---
+        
+        function cargarContenido(fecha) {
+            contenedor.innerHTML = ""; // Limpiar contenido anterior
+            const datosDelDia = newsData[fecha];
+
+            if (!datosDelDia || Object.keys(datosDelDia).length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center;">No hay notas informativas para esta fecha.</p>';
+                return;
+            }
+
+            for (const categoria of categorias) {
+                if (datosDelDia[categoria] && datosDelDia[categoria].length > 0) {
+                    const divSeccion = document.createElement("div");
+                    divSeccion.className = "seccion-noticia";
+                    divSeccion.id = categoria.toLowerCase().replace(/ /g, '-');
+                    
+                    let contenidoHTML = `<h3>${categoria}</h3>`;
+                    
+                    datosDelDia[categoria].forEach(nota => {
+                        contenidoHTML += `
+                            <div class="noticia-item">
+                                <h4>${nota.title}</h4>
+                                <p class="fuente">Fuente: ${nota.source}</p>
+                                <p>${nota.summary}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    divSeccion.innerHTML = contenidoHTML;
+                    contenedor.appendChild(divSeccion);
+                }
+            }
+        }
+
+        selectorFecha.addEventListener("change", (e) => {
+            cargarContenido(e.target.value);
+        });
+
+        // --- Inicialización de la Aplicación ---
+        function init() {
+            // Poblar el dropdown de categorías en el formulario
+            categorias.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                selectorCategoria.appendChild(option);
+            });
+            
+            // Establecer fechas por defecto
+            const hoy = fechaActual.toISOString().split('T')[0];
+            selectorFecha.value = hoy;
+            inputFechaNota.value = hoy;
+            
+            // Cargar contenido del día actual por defecto
+            cargarContenido(hoy);
+        }
+
+        init(); // Arrancar la aplicación
+    });
+  </script>
+</body>
+</html>
